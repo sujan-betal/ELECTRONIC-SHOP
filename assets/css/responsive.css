@@ -1,0 +1,65 @@
+/* Responsive Adjustments */
+
+@media (max-width: 991px) {
+    .top-nav {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .slide h1 {
+        font-size: 2rem;
+    }
+    
+    .other-card-group {
+        flex-direction: column;
+    }
+    
+    #newslater input {
+        width: 60%;
+        margin-bottom: 10px;
+        border-radius: 5px;
+    }
+    #subscribe {
+        width: 60%;
+        border-radius: 5px;
+    }
+}
+
+@media (max-width: 768px) {
+    .slide h1 {
+        font-size: 1.5rem;
+    }
+    .slide {
+        padding: 0 5%;
+    }
+    
+    #login .row, #register .row, #contact .row {
+        flex-direction: column;
+    }
+    #side1 {
+        padding: 50px 20px;
+    }
+    
+    .footer-contact {
+        margin-bottom: 30px;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-group {
+        grid-template-columns: 1fr;
+    }
+    
+    .latest-product .card-groups {
+        grid-template-columns: 1fr;
+    }
+    
+    .review {
+        grid-template-columns: 1fr;
+    }
+    
+    .latest-offer-group {
+        grid-template-columns: 1fr;
+    }
+}
