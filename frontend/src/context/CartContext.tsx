@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, CartItem } from '@/types';
 
+type CurrencyType = 'USD' | 'EUR' | 'BDT';
+
 interface CartContextType {
   cart: CartItem[];
   addToCart: (product: Product, quantity?: number) => void;
@@ -25,20 +27,47 @@ interface CartContextType {
   wishlist: number[];
   toggleWishlist: (productId: number) => void;
   isWishlisted: (productId: number) => boolean;
+  // Quick View
+  quickViewProduct: Product | null;
+  openQuickView: (product: Product) => void;
+  closeQuickView: () => void;
+  // Compare State
+  compareList: Product[];
+  toggleCompare: (product: Product) => void;
+  removeFromCompare: (productId: number) => void;
+  clearCompare: () => void;
+  isCompared: (productId: number) => boolean;
+  isCompareDrawerOpen: boolean;
+  openCompareDrawer: () => void;
+  closeCompareDrawer: () => void;
+  // Currency
+  currency: CurrencyType;
+  setCurrency: (c: CurrencyType) => void;
+  formatPrice: (priceUSD: number) => string;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const CURRENCY_RATES: Record<CurrencyType, { symbol: string; rate: number }> = {
+  USD: { symbol: '$', rate: 1 },
+  EUR: { symbol: '€', rate: 0.92 },
+  BDT: { symbol: '৳', rate: 119.5 },
+};
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<number[]>([]);
+  const [compareList, setCompareList] = useState<Product[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCompareDrawerOpen, setIsCompareDrawerOpen] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [couponCode, setCouponCode] = useState('');
   const [couponDiscountPercent, setCouponDiscountPercent] = useState(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [currency, setCurrency] = useState<CurrencyType>('USD');
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Load cart and wishlist from localStorage on client mount
+  // Load from localStorage on client mount
   useEffect(() => {
     try {
       const savedCart = localStorage.getItem('tech_shop_cart');
@@ -46,6 +75,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       const savedWishlist = localStorage.getItem('tech_shop_wishlist');
       if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
+
+      const savedCurrency = localStorage.getItem('tech_shop_currency') as CurrencyType;
+      if (savedCurrency && CURRENCY_RATES[savedCurrency]) setCurrency(savedCurrency);
     } catch (e) {
       console.error('Failed to load storage data', e);
     }
@@ -72,6 +104,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [wishlist, isInitialized]);
 
+  // Save currency
+  useEffect(() => {
+    if (!isInitialized) return;
+    try {
+      localStorage.setItem('tech_shop_currency', currency);
+    } catch (e) {
+      console.error('Failed to save currency', e);
+    }
+  }, [currency, isInitialized]);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {
@@ -91,7 +133,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, { product, quantity }];
     });
-    showToast(`Added "${product.name.slice(0, 24)}..." to cart!`);
+    showToast(`Added "${product.name.slice(0, 24)}..." to cart! ⚡`);
     setIsCartOpen(true);
   };
 
@@ -123,15 +165,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (clean === 'TECH10') {
       setCouponCode('TECH10');
       setCouponDiscountPercent(0.10);
-      showToast('10% Discount applied with TECH10!');
+      showToast('🎉 10% Discount applied with TECH10!');
       return true;
     } else if (clean === 'CYBER20') {
       setCouponCode('CYBER20');
       setCouponDiscountPercent(0.20);
-      showToast('20% Flash Discount applied with CYBER20!');
+      showToast('🚀 20% Flash Discount applied with CYBER20!');
       return true;
     } else {
-      showToast('Invalid promo code. Try "TECH10"');
+      showToast('❌ Invalid promo code. Try "TECH10" or "CYBER20"');
       return false;
     }
   };
@@ -155,6 +197,42 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const isWishlisted = (productId: number) => wishlist.includes(productId);
+
+  // Compare Functions
+  const toggleCompare = (product: Product) => {
+    setCompareList(prev => {
+      const exists = prev.some(p => p.id === product.id);
+      if (exists) {
+        showToast(`Removed ${product.name.slice(0, 18)} from comparison`);
+        return prev.filter(p => p.id !== product.id);
+      } else {
+        if (prev.length >= 4) {
+          showToast('You can compare up to 4 devices simultaneously');
+          return prev;
+        }
+        showToast(`Added ${product.name.slice(0, 18)} to comparison ⚖️`);
+        setIsCompareDrawerOpen(true);
+        return [...prev, product];
+      }
+    });
+  };
+
+  const removeFromCompare = (productId: number) => {
+    setCompareList(prev => prev.filter(p => p.id !== productId));
+  };
+
+  const clearCompare = () => setCompareList([]);
+
+  const isCompared = (productId: number) => compareList.some(p => p.id === productId);
+
+  const formatPrice = (priceUSD: number): string => {
+    const info = CURRENCY_RATES[currency] || CURRENCY_RATES.USD;
+    const converted = priceUSD * info.rate;
+    if (currency === 'BDT') {
+      return `${info.symbol}${Math.round(converted).toLocaleString()}`;
+    }
+    return `${info.symbol}${converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
@@ -186,6 +264,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         wishlist,
         toggleWishlist,
         isWishlisted,
+        quickViewProduct,
+        openQuickView: (p: Product) => setQuickViewProduct(p),
+        closeQuickView: () => setQuickViewProduct(null),
+        compareList,
+        toggleCompare,
+        removeFromCompare,
+        clearCompare,
+        isCompared,
+        isCompareDrawerOpen,
+        openCompareDrawer: () => setIsCompareDrawerOpen(true),
+        closeCompareDrawer: () => setIsCompareDrawerOpen(false),
+        currency,
+        setCurrency,
+        formatPrice,
       }}
     >
       {children}

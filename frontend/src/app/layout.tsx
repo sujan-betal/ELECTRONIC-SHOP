@@ -8,6 +8,8 @@ import Footer from '@/components/layout/Footer';
 import CartDrawer from '@/components/cart/CartDrawer';
 import AuthModal from '@/components/auth/AuthModal';
 import Toast from '@/components/common/Toast';
+import ProductQuickViewModal from '@/components/products/ProductQuickViewModal';
+import ProductCompareDrawer from '@/components/products/ProductCompareDrawer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -33,6 +35,8 @@ export default function RootLayout({
             <Footer />
             <CartDrawer />
             <AuthModal />
+            <ProductQuickViewModal />
+            <ProductCompareDrawer />
             <Toast />
           </CartProvider>
         </AuthProvider>
