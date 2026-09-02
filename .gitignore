@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+*/node_modules/
+package-lock.json
+
+# Next.js Build
+.next/
+*/.next/
+out/
+build/
+dist/
+
+# Python / FastAPI
+__pycache__/
+*/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.db
+*.sqlite3
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env*.local
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

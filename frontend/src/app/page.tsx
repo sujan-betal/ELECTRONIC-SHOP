@@ -1,0 +1,87 @@
+import React from 'react';
+import Link from 'next/link';
+import { fetchCategories, fetchProducts } from '@/lib/api';
+import HeroBanner from '@/components/home/HeroBanner';
+import CategoryGrid from '@/components/home/CategoryGrid';
+import FlashDeals from '@/components/home/FlashDeals';
+import PromoBanners from '@/components/home/PromoBanners';
+import ProductCard from '@/components/products/ProductCard';
+import { ArrowRight, Sparkles, Zap, ShieldCheck, Flame } from 'lucide-react';
+
+export default async function HomePage() {
+  const categories = await fetchCategories();
+  const { items: products } = await fetchProducts({ limit: 12 });
+
+  const featuredProducts = products.filter((p) => p.is_featured);
+  const newArrivals = products.filter((p) => p.is_new_arrival);
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+      {/* Hero Section */}
+      <HeroBanner />
+
+      {/* Category Explorer */}
+      <CategoryGrid categories={categories} />
+
+      {/* Flash Deals Counter */}
+      <FlashDeals products={products} />
+
+      {/* Featured Products Showcase */}
+      <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-8 gap-4">
+          <div>
+            <span className="text-xs font-bold text-cyan-400 font-mono tracking-widest uppercase flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" /> Handpicked Excellence
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">
+              Featured Flagships
+            </h2>
+          </div>
+          <Link
+            href="/products"
+            className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 group transition-colors"
+          >
+            <span>View all {products.length} devices</span>
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {(featuredProducts.length > 0 ? featuredProducts : products.slice(0, 4)).map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </section>
+
+      {/* Promo Cyber Banners */}
+      <PromoBanners />
+
+      {/* New Arrivals Section */}
+      <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mb-12">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-8 gap-4">
+          <div>
+            <span className="text-xs font-bold text-indigo-400 font-mono tracking-widest uppercase flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5" /> Latest 2026 Releases
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">
+              New In The Lab
+            </h2>
+          </div>
+          <Link
+            href="/products?new_arrival=true"
+            className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 group transition-colors"
+          >
+            <span>Explore all new gear</span>
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {(newArrivals.length > 0 ? newArrivals : products.slice(4, 8)).map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
