@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ⚡ TechPulse - Modern Electronic Shop (Full-Stack E-Commerce)
 
 An enterprise-grade, high-tech electronic shop e-commerce platform built with **Next.js 16 (React 19, TypeScript, Tailwind CSS)** frontend and a high-performance **FastAPI (SQLAlchemy, SQLite/PostgreSQL, Pydantic v2, PyJWT)** backend.
@@ -145,3 +146,6 @@ ELECTRONIC-SHOP/
 ├── run_dev.ps1                # PowerShell launcher
 └── README.md
 ```
+=======
+
+>>>>>>> a3607fef2b86ae74df7899825c84bc1780144592
